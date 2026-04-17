@@ -17,6 +17,11 @@
   <flags EDM_PLUGIN="1"/>
 </library>
 
+<use name="acts-core"/>
+<use name="acts-json"/>
+<use name="acts-svg"/>
+<use name="acts-root"/>
+
 <library name="DD4hep_SimTrackerMaterialAnalysisPlugins" file="dd4hep/*.cc">
   <use name="DataFormats/DetId"/>
   <use name="DataFormats/GeometryVector"/>
