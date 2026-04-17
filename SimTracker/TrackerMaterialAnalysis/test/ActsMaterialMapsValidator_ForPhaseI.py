@@ -43,22 +43,18 @@ process.trackinGeoProducer = cms.ESProducer("TrackerGeomBuilderWithActsESProduce
     saveSvgfile    = cms.untracked.bool(False),
     outputSvgFile  = cms.untracked.string("CMSPhase1Blueprint.svg"),
     # Option to map the material from a JSON file
-    mapMaterial    = cms.untracked.bool(False), # NOTE: needs to be false while producing the mmaterial maps
-    MaterialMaps   = cms.untracked.string(""),
+    mapMaterial    = cms.untracked.bool(True),
+    MaterialMaps   = cms.untracked.string("/eos/user/l/ldamenti/ForkTest/ActsMaterialMaps_diffG4File.json"),
 
     ActsLogLevel    = cms.untracked.string("info")
 )
 
-# ===== Create the Material Maps =====
-process.createMaterialFile = cms.EDProducer("ActsJsonMaterialMapProducer",
-    G4InputFile = cms.untracked.string("/eos/user/l/ldamenti/G4MaterialFiles/geant4MaterialFile_1e6Tracks_ActsUnits_WithMyFormula.root"),
-    OutputFile  = cms.untracked.string("/eos/user/l/ldamenti/ForkTest/ActsMaterialMaps_diffG4File.json"),
-    Nevents = cms.untracked.int32(1000000),    # NOTE: MAX value = number of tracks of the G4 file
-    ActsLogLevel    = cms.untracked.string("info")
+# ===== Validate the Mapped Material =====
+process.validateMappedMat = cms.EDProducer("ActsMaterialMapsValidator", 
+    Nevents = cms.untracked.int32(1000), # NOTE: Must be the number of tracks of the G4 file used to make the material maps
+    Ntracks = cms.untracked.int32(1),
+    ActsMatTracksFilename = cms.untracked.string("/eos/user/l/ldamenti/ForkTest/Acts_MatTracks_forValidation_diffG4File.root")
 )
 
 # ====== Paths ======
-process.p = cms.Path(process.createMaterialFile)
-
-
-
+process.p = cms.Path(process.validateMappedMat)

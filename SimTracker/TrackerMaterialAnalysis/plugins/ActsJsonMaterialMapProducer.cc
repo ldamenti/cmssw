@@ -1,3 +1,14 @@
+/// ######################################################################################
+/// # Plugin used to convert the CMSSW detector elements in ACTS detector elements.      #
+/// # The output is a vector of Acts::CMSDetectorElement which can be used to            #
+/// # build the Tracking Geometry.                                                       #
+/// # NOTE: Plugins list:                                                                #  
+/// # (1) Converts the CMSSW detElements into ACTS ones and builds the Tracking Geometry # <- DONE (I) <->(III) flags to map material
+/// # (2) Produces a JSON material file starting from material tracks                    # <- DONE (II)
+/// # (3) Takes as input the tracking geometry from (1) and the json file from (3) and   # <- DONE (IV) validation only
+/// #     decorates the tracking geometry with material. It performs material Validation #  
+/// ######################################################################################
+// git cms-addpkg
 #include "FWCore/Framework/interface/one/EDProducer.h"
 #include "FWCore/Framework/interface/ESProducer.h"
 #include "FWCore/Framework/interface/Event.h"
@@ -214,11 +225,11 @@ struct MaterialSurfaceSelector {
 // ##########################################################################################
 
 
-class JsonMaterialMapsProducer : public edm::one::EDProducer<> {
-//class JsonMaterialMapsProducer : public edm::ESProducer {
+class ActsJsonMaterialMapProducer : public edm::one::EDProducer<> {
+//class ActsJsonMaterialMapProducer : public edm::ESProducer {
 public:
-  explicit JsonMaterialMapsProducer(const edm::ParameterSet& ps);
-  ~JsonMaterialMapsProducer() override = default;
+  explicit ActsJsonMaterialMapProducer(const edm::ParameterSet& ps);
+  ~ActsJsonMaterialMapProducer() override = default;
   void produce(edm::Event& iEvent, const edm::EventSetup& iSetup) override;
   //void produce(const ACTSTrackerGeometryRecord& iRecord);
 
@@ -229,16 +240,15 @@ private:
   std::string ActsLogLevel_;
 };
 
-JsonMaterialMapsProducer::JsonMaterialMapsProducer(const edm::ParameterSet& ps)
+ActsJsonMaterialMapProducer::ActsJsonMaterialMapProducer(const edm::ParameterSet& ps)
     : ACTStrkGeomInfoToken_(esConsumes<TrackingGeometryWithDetEls, ACTSTrackerGeometryRecord>()),
       inputFile_(ps.getUntrackedParameter<std::string>("G4InputFile")),
       outputFile_(ps.getUntrackedParameter<std::string>("OutputFile")),
       Nevents_(ps.getUntrackedParameter<int>("Nevents")),
       ActsLogLevel_(ps.getUntrackedParameter<std::string>("ActsLogLevel")){}
 
-
-void JsonMaterialMapsProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) { 
-//void JsonMaterialMapsProducer::produce(const ACTSTrackerGeometryRecord& iRecord) { 
+void ActsJsonMaterialMapProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) { 
+//void ActsJsonMaterialMapProducer::produce(const ACTSTrackerGeometryRecord& iRecord) { 
   // Get the Tracking Geometry and check if it's valid
   const auto& trkGeo_and_DetEls = iSetup.getData(ACTStrkGeomInfoToken_);
   DetElVect detEls = trkGeo_and_DetEls.detElements;
@@ -247,18 +257,15 @@ void JsonMaterialMapsProducer::produce(edm::Event& iEvent, const edm::EventSetup
       edm::LogError("ACTSRefitTracksProducer") << "ACTS TrackerGeometry is nullptr!";
       return;  
   }
-  // const auto& trackingGeometry = iSetup.getData(trackerGeomToken_); // <- old
-  //const TrackerGeometry& trackingGeometry = iRecord.get(trackerGeomToken_);
 
   std::cout << ">>>>> Create Material Maps <<<<<" << std::endl;
-
   // ===== Collect Material Tracks =====
   Acts::GeometryContext gCtx;
   Acts::MagneticFieldContext mfCtx;
 
   MaterialConfig test_reader_cfg;
   test_reader_cfg.treeName = "material-tracks";
-  test_reader_cfg.fileList = {inputFile_}; 
+  test_reader_cfg.fileList = {inputFile_};
   MyMaterialEvReader my_reader(test_reader_cfg);
 
   // Collect the material surfaces from the trackingGeometry:
@@ -294,7 +301,6 @@ void JsonMaterialMapsProducer::produce(edm::Event& iEvent, const edm::EventSetup
   for(int i = 0; i < Tot_events; i++){
     std::cout << "\rAnalysing event " << i+1 << " out of " << Tot_events << std::flush;
     ref_index+=1;
-
     std::unordered_map<std::size_t, Acts::RecordedMaterialTrack> this_event = my_reader.read(i);
 
     std::size_t nTracksThisEvent = 0;
@@ -308,6 +314,7 @@ void JsonMaterialMapsProducer::produce(edm::Event& iEvent, const edm::EventSetup
       ++nTracksThisEvent;
     }
   }
+
   std::cout << "" << std::endl;
 
   // ===== Save the material maps into a json file =====
@@ -318,10 +325,8 @@ void JsonMaterialMapsProducer::produce(edm::Event& iEvent, const edm::EventSetup
   JsonMaterialWriter json_writer(json_cfg, Acts::Logging::Level::VERBOSE);
   json_writer.writeMaterial(trkGeoMat_maps);
 
-
 }
 
-//DEFINE_FWK_EVENTSETUP_MODULE(JsonMaterialMapsProducer);
-DEFINE_FWK_MODULE(JsonMaterialMapsProducer);
+DEFINE_FWK_MODULE(ActsJsonMaterialMapProducer);
 
 
