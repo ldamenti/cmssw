@@ -32,14 +32,10 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 1
 process.source = cms.Source("EmptySource")
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1))
 
-# ====== MeasurementTrackerEvent ======
-process.MeasurementTrackerEvent = cms.EDProducer("MeasurementTrackerEventProducer",
-    stripClusterProducer = cms.string("siStripClusters"),
-    pixelClusterProducer = cms.string("siPixelClusters"),
-)
-
 # ===== Construct the ACTS Tracking Geometry =====
 process.trackinGeoProducer = cms.ESProducer("TrackerGeomBuilderWithActsESProducer", 
+    # Option to save the sensitive surfaces in a JSON file
+    saveJsonfile   = cms.untracked.bool(False),
     # Options to save the detector elements in an OBJ file
     saveObjfile    = cms.untracked.bool(False),
     outputObjFile  = cms.untracked.string("testSlice.obj"),
@@ -50,13 +46,15 @@ process.trackinGeoProducer = cms.ESProducer("TrackerGeomBuilderWithActsESProduce
     outputSvgFile  = cms.untracked.string("CMSPhase1Blueprint.svg"),
     # Option to map the material from a JSON file
     mapMaterial    = cms.untracked.bool(False),
-    MaterialMaps   = cms.untracked.string("MaterialMaps.json")
+    MaterialMaps   = cms.untracked.string("MaterialMaps.json"),
+
+    ActsLogLevel    = cms.untracked.string("info")
 )
 
 process.get = cms.EDAnalyzer("EventSetupRecordDataGetter",
     toGet = cms.VPSet(cms.PSet(
         record = cms.string('ACTSTrackerGeometryRecord'),
-        data = cms.vstring('Acts::TrackingGeometry'),
+        data = cms.vstring('TrackingGeometryWithDetEls'),
     )),
     verbose = cms.untracked.bool(True))
 

@@ -1147,8 +1147,8 @@ private:
   edm::ESGetToken<TrackerTopology, TrackerTopologyRcd> trackerTopoToken_;
   edm::ESGetToken<Alignments, TrackerAlignmentRcd> trackerAlignToken_;
 
-  bool saveObjfile_, saveSvgfile_, mapMaterial_;
-  std::string outputObjFile_, outputSvgFile_, materialFile_;
+  bool saveObjfile_, saveSvgfile_, mapMaterial_, saveJsonfile_;
+  std::string outputObjFile_, outputSvgFile_, materialFile_, ActsLogLevel_;
   std::vector<double> rangeZ_;
   std::vector<double> rangeR_;
 };
@@ -1158,9 +1158,11 @@ TrackerGeomBuilderWithActsESProducer::TrackerGeomBuilderWithActsESProducer(const
     : saveObjfile_(ps.getUntrackedParameter<bool>("saveObjfile")),
       saveSvgfile_(ps.getUntrackedParameter<bool>("saveSvgfile")), 
       mapMaterial_(ps.getUntrackedParameter<bool>("mapMaterial")), 
+      saveJsonfile_(ps.getUntrackedParameter<bool>("saveJsonfile")),
       outputObjFile_(ps.getUntrackedParameter<std::string>("outputObjFile")),
       outputSvgFile_(ps.getUntrackedParameter<std::string>("outputSvgFile")),
       materialFile_(ps.getUntrackedParameter<std::string>("MaterialMaps")),
+      ActsLogLevel_(ps.getUntrackedParameter<std::string>("ActsLogLevel")),
       rangeZ_(ps.getUntrackedParameter<std::vector<double>>("rangeZ")),
       rangeR_(ps.getUntrackedParameter<std::vector<double>>("rangeR")) {
 
@@ -1618,10 +1620,11 @@ std::shared_ptr<TrackingGeometryWithDetEls> TrackerGeomBuilderWithActsESProducer
   nlohmann::json jSurfacesAll;
   jSurfacesAll["surfaces"] = jSurfaces;
 
-  std::cout << ">>> Storing all the surfaces into a json file <<<" << std::endl;
-  std::ofstream file("CMSPhaseI_Sensitive_All.json");
-  file << jSurfacesAll.dump(4) << '\n';
-
+  if(saveJsonfile_) {
+    std::cout << ">>> Storing all the surfaces into a json file <<<" << std::endl;
+    std::ofstream file("CMSPhaseI_Sensitive_All.json");
+    file << jSurfacesAll.dump(4) << '\n';
+  }
 
   // ===== Make the blueprint =====
   Acts::Transform3 base{Acts::Transform3::Identity()};
@@ -2082,7 +2085,8 @@ std::shared_ptr<TrackingGeometryWithDetEls> TrackerGeomBuilderWithActsESProducer
 
   // ===== Construct the TrackingGeometry from the blueprint =====
   Acts::GeometryContext gctx;
-  auto logger = Acts::getDefaultLogger("UnitTests", Acts::Logging::VERBOSE);
+  auto logLevel = (ActsLogLevel_ == "verbose") ? Acts::Logging::VERBOSE : Acts::Logging::INFO;
+  auto logger = Acts::getDefaultLogger("UnitTests", logLevel);
   Acts::Experimental::BlueprintOptions BluePrint_otp;
   std::shared_ptr<Acts::TrackingGeometry> trackingGeometry = std::move(root->construct(BluePrint_otp, gctx, *logger));
 
@@ -2106,7 +2110,7 @@ std::shared_ptr<TrackingGeometryWithDetEls> TrackerGeomBuilderWithActsESProducer
     std::cout << ">>> Flag mapMaterial_ True <<<" << std::endl;
     std::cout << "Mapping material on sensitive surfaces, from " << materialFile_ << std::endl;
     Acts::MaterialMapJsonConverter::Config dec_cfg;
-    Acts::JsonMaterialDecorator jsonMatDec(dec_cfg, materialFile_, Acts::Logging::Level::VERBOSE);
+    Acts::JsonMaterialDecorator jsonMatDec(dec_cfg, materialFile_, Acts::Logging::Level::INFO);
 
     MatSurfaceSelector sel;
     trackingGeometry->apply(sel);
