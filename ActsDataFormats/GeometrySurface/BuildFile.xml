@@ -9,6 +9,7 @@
 <use name="FWCore/MessageLogger"/>
 <use name="CondFormats/SiStripObjects"/>
 <use name="DetectorDescription/Core"/>
+<use name="MagneticField/VolumeBasedEngine"/>
 <use name="ROOT"/>
 
 <use name="acts-core"/>

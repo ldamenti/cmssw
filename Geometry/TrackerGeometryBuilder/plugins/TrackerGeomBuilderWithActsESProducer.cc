@@ -1687,15 +1687,15 @@ std::shared_ptr<TrackingGeometryWithDetEls> TrackerGeomBuilderWithActsESProducer
               //AddDiskLayer_and_Material(&ec, "NegTEC5", makeLayer, -2058*Acts::UnitConstants::mm, 80, 6);
               AddDiskLayer_and_Material(&ec, "NegTEC5_1", makeLayer, -2058*Acts::UnitConstants::mm, 80, 6);
               AddDiskLayer_and_Material(&ec, "NegTEC5_2", makeLayer, -2058*Acts::UnitConstants::mm, 80, 6);
-              AddExtraLayer("ExtraECMatLater4", false, &ec, GenerateTranslation(0, 0, -2150*Acts::UnitConstants::mm), std::make_shared<Acts::CylinderVolumeBounds>(10*Acts::UnitConstants::mm, 1200*Acts::UnitConstants::mm, 10*Acts::UnitConstants::mm));
+              AddExtraLayer("ExtraECMatLater4", false, &ec, GenerateTranslation(0, 0, -2150*Acts::UnitConstants::mm), std::make_shared<Acts::CylinderVolumeBounds>(24*Acts::UnitConstants::mm, 1200*Acts::UnitConstants::mm, 10*Acts::UnitConstants::mm));
               //AddDiskLayer_and_Material(&ec, "NegTEC6", makeLayer, -2248*Acts::UnitConstants::mm, 80, 7);
               AddDiskLayer_and_Material(&ec, "NegTEC6_1", makeLayer, -2248*Acts::UnitConstants::mm, 80, 7);
               AddDiskLayer_and_Material(&ec, "NegTEC6_2", makeLayer, -2248*Acts::UnitConstants::mm, 80, 7);
-              AddExtraLayer("ExtraECMatLater5", false, &ec, GenerateTranslation(0, 0, -2350*Acts::UnitConstants::mm), std::make_shared<Acts::CylinderVolumeBounds>(10*Acts::UnitConstants::mm, 1200*Acts::UnitConstants::mm, 10*Acts::UnitConstants::mm));
+              AddExtraLayer("ExtraECMatLater5", false, &ec, GenerateTranslation(0, 0, -2350*Acts::UnitConstants::mm), std::make_shared<Acts::CylinderVolumeBounds>(24*Acts::UnitConstants::mm, 1200*Acts::UnitConstants::mm, 10*Acts::UnitConstants::mm));
               //AddDiskLayer_and_Material(&ec, "NegTEC7", makeLayer, -2454*Acts::UnitConstants::mm, 80, 7);
               AddDiskLayer_and_Material(&ec, "NegTEC7_1", makeLayer, -2454*Acts::UnitConstants::mm, 80, 7);
               AddDiskLayer_and_Material(&ec, "NegTEC7_2", makeLayer, -2454*Acts::UnitConstants::mm, 80, 7);
-              AddExtraLayer("ExtraECMatLater6", false, &ec, GenerateTranslation(0, 0, -2550*Acts::UnitConstants::mm), std::make_shared<Acts::CylinderVolumeBounds>(10*Acts::UnitConstants::mm, 1200*Acts::UnitConstants::mm, 10*Acts::UnitConstants::mm));
+              AddExtraLayer("ExtraECMatLater6", false, &ec, GenerateTranslation(0, 0, -2550*Acts::UnitConstants::mm), std::make_shared<Acts::CylinderVolumeBounds>(24*Acts::UnitConstants::mm, 1200*Acts::UnitConstants::mm, 10*Acts::UnitConstants::mm));
 
               // ec.addLayer("NegTEC8", [&](auto& layer) {
               //   makeLayer(base * Acts::Translation3{Acts::Vector3{0, 0, -2666*Acts::UnitConstants::mm}}, layer, "NegTEC8", 80, 7);
@@ -1708,8 +1708,8 @@ std::shared_ptr<TrackingGeometryWithDetEls> TrackerGeomBuilderWithActsESProducer
 
             });
         
-        AddExtraLayer("extra_ecneg", false, &det, GenerateTranslation(0, 0, -1160*Acts::UnitConstants::mm), std::make_shared<Acts::CylinderVolumeBounds>(10*Acts::UnitConstants::mm, 1200*Acts::UnitConstants::mm, 15*Acts::UnitConstants::mm));
-        AddExtraLayer("extra_ecneg2", false, &det, GenerateTranslation(0, 0, -1210*Acts::UnitConstants::mm), std::make_shared<Acts::CylinderVolumeBounds>(10*Acts::UnitConstants::mm, 1200*Acts::UnitConstants::mm, 15*Acts::UnitConstants::mm));
+        AddExtraLayer("extra_ecneg", false, &det, GenerateTranslation(0, 0, -1160*Acts::UnitConstants::mm), std::make_shared<Acts::CylinderVolumeBounds>(24*Acts::UnitConstants::mm, 1200*Acts::UnitConstants::mm, 15*Acts::UnitConstants::mm));
+        AddExtraLayer("extra_ecneg2", false, &det, GenerateTranslation(0, 0, -1210*Acts::UnitConstants::mm), std::make_shared<Acts::CylinderVolumeBounds>(24*Acts::UnitConstants::mm, 1200*Acts::UnitConstants::mm, 15*Acts::UnitConstants::mm));
                     
         det.addCylinderContainer("Pixel_TIB_TID_TOB", Acts::AxisDirection::AxisR, [&](auto& barr) { 
           barr.setAttachmentStrategy(Acts::VolumeAttachmentStrategy::Gap)
@@ -1719,9 +1719,9 @@ std::shared_ptr<TrackingGeometryWithDetEls> TrackerGeomBuilderWithActsESProducer
             cyl.setAttachmentStrategy(Acts::VolumeAttachmentStrategy::Gap)
                 .setResizeStrategy(Acts::VolumeResizeStrategy::Gap);
 
-            AddExtraLayer("extra_after_frwPixelNeg1", false, &cyl, GenerateTranslation(0, 0, -800*Acts::UnitConstants::mm), std::make_shared<Acts::CylinderVolumeBounds>(10*Acts::UnitConstants::mm, 170*Acts::UnitConstants::mm, 10*Acts::UnitConstants::mm));
-            AddExtraLayer("extra_after_frwPixelNeg2", false, &cyl, GenerateTranslation(0, 0, -700*Acts::UnitConstants::mm), std::make_shared<Acts::CylinderVolumeBounds>(10*Acts::UnitConstants::mm, 170*Acts::UnitConstants::mm, 10*Acts::UnitConstants::mm));
-            AddExtraLayer("extra_after_frwPixelNeg3", false, &cyl, GenerateTranslation(0, 0, -600*Acts::UnitConstants::mm), std::make_shared<Acts::CylinderVolumeBounds>(10*Acts::UnitConstants::mm, 170*Acts::UnitConstants::mm, 10*Acts::UnitConstants::mm));
+            AddExtraLayer("extra_after_frwPixelNeg1", false, &cyl, GenerateTranslation(0, 0, -800*Acts::UnitConstants::mm), std::make_shared<Acts::CylinderVolumeBounds>(24*Acts::UnitConstants::mm, 170*Acts::UnitConstants::mm, 10*Acts::UnitConstants::mm));
+            AddExtraLayer("extra_after_frwPixelNeg2", false, &cyl, GenerateTranslation(0, 0, -700*Acts::UnitConstants::mm), std::make_shared<Acts::CylinderVolumeBounds>(24*Acts::UnitConstants::mm, 170*Acts::UnitConstants::mm, 10*Acts::UnitConstants::mm));
+            AddExtraLayer("extra_after_frwPixelNeg3", false, &cyl, GenerateTranslation(0, 0, -600*Acts::UnitConstants::mm), std::make_shared<Acts::CylinderVolumeBounds>(24*Acts::UnitConstants::mm, 170*Acts::UnitConstants::mm, 10*Acts::UnitConstants::mm));
              
             cyl.addCylinderContainer(
                 "PixelNegativeEndcap", Acts::AxisDirection::AxisZ, [&](auto& ec) {
@@ -1742,7 +1742,7 @@ std::shared_ptr<TrackingGeometryWithDetEls> TrackerGeomBuilderWithActsESProducer
                         .setUseCenterOfGravity(false, false, true); // To fix the transaltion on x-y
                   };
 
-                  AddExtraLayer("ExtraNegPFMatLayer1", false, &ec, GenerateTranslation(0, 0, -278*Acts::UnitConstants::mm), std::make_shared<Acts::CylinderVolumeBounds>(10*Acts::UnitConstants::mm, 170*Acts::UnitConstants::mm, 4*Acts::UnitConstants::mm));
+                  AddExtraLayer("ExtraNegPFMatLayer1", false, &ec, GenerateTranslation(0, 0, -278*Acts::UnitConstants::mm), std::make_shared<Acts::CylinderVolumeBounds>(24*Acts::UnitConstants::mm, 170*Acts::UnitConstants::mm, 4*Acts::UnitConstants::mm));
 
                   AddDiskLayer_and_Material(&ec, "PixelNeg0", makeLayer, -322*Acts::UnitConstants::mm, 36, 2);
                   AddDiskLayer_and_Material(&ec, "PixelNeg1", makeLayer, -395*Acts::UnitConstants::mm, 36, 2);
@@ -1781,16 +1781,16 @@ std::shared_ptr<TrackingGeometryWithDetEls> TrackerGeomBuilderWithActsESProducer
                         .setUseCenterOfGravity(false, false, true); // To fix the transaltion on x-y
                   };
 
-                  AddExtraLayer("ExtraPosPFMatLayer1", false, &ec, GenerateTranslation(0, 0, 278*Acts::UnitConstants::mm), std::make_shared<Acts::CylinderVolumeBounds>(10*Acts::UnitConstants::mm, 170*Acts::UnitConstants::mm, 4*Acts::UnitConstants::mm));
+                  AddExtraLayer("ExtraPosPFMatLayer1", false, &ec, GenerateTranslation(0, 0, 278*Acts::UnitConstants::mm), std::make_shared<Acts::CylinderVolumeBounds>(24*Acts::UnitConstants::mm, 170*Acts::UnitConstants::mm, 4*Acts::UnitConstants::mm));
 
                   AddDiskLayer_and_Material(&ec, "PixelPos0", makeLayer, 322*Acts::UnitConstants::mm, 36, 2);
                   AddDiskLayer_and_Material(&ec, "PixelPos1", makeLayer, 395*Acts::UnitConstants::mm, 36, 2);
                   AddDiskLayer_and_Material(&ec, "PixelPos2", makeLayer, 493*Acts::UnitConstants::mm, 36, 2);
                 });
 
-            AddExtraLayer("extra_after_frwPixelPos1", false, &cyl, GenerateTranslation(0, 0, 600*Acts::UnitConstants::mm), std::make_shared<Acts::CylinderVolumeBounds>(10*Acts::UnitConstants::mm, 170*Acts::UnitConstants::mm, 10*Acts::UnitConstants::mm));
-            AddExtraLayer("extra_after_frwPixelPos2", false, &cyl, GenerateTranslation(0, 0, 700*Acts::UnitConstants::mm), std::make_shared<Acts::CylinderVolumeBounds>(10*Acts::UnitConstants::mm, 170*Acts::UnitConstants::mm, 10*Acts::UnitConstants::mm));
-            AddExtraLayer("extra_after_frwPixelPos3", false, &cyl, GenerateTranslation(0, 0, 800*Acts::UnitConstants::mm), std::make_shared<Acts::CylinderVolumeBounds>(10*Acts::UnitConstants::mm, 170*Acts::UnitConstants::mm, 10*Acts::UnitConstants::mm));
+            AddExtraLayer("extra_after_frwPixelPos1", false, &cyl, GenerateTranslation(0, 0, 600*Acts::UnitConstants::mm), std::make_shared<Acts::CylinderVolumeBounds>(24*Acts::UnitConstants::mm, 170*Acts::UnitConstants::mm, 10*Acts::UnitConstants::mm));
+            AddExtraLayer("extra_after_frwPixelPos2", false, &cyl, GenerateTranslation(0, 0, 700*Acts::UnitConstants::mm), std::make_shared<Acts::CylinderVolumeBounds>(24*Acts::UnitConstants::mm, 170*Acts::UnitConstants::mm, 10*Acts::UnitConstants::mm));
+            AddExtraLayer("extra_after_frwPixelPos3", false, &cyl, GenerateTranslation(0, 0, 800*Acts::UnitConstants::mm), std::make_shared<Acts::CylinderVolumeBounds>(24*Acts::UnitConstants::mm, 170*Acts::UnitConstants::mm, 10*Acts::UnitConstants::mm));
               
           });
 
@@ -2051,15 +2051,15 @@ std::shared_ptr<TrackingGeometryWithDetEls> TrackerGeomBuilderWithActsESProducer
               AddDiskLayer_and_Material(&ec, "PosTEC5_1", makeLayer, 2058*Acts::UnitConstants::mm, 80, 6);
               AddDiskLayer_and_Material(&ec, "PosTEC5_2", makeLayer, 2058*Acts::UnitConstants::mm, 80, 6);
 
-              AddExtraLayer("ExtraECMatLater1", false, &ec, GenerateTranslation(0, 0, 2150*Acts::UnitConstants::mm), std::make_shared<Acts::CylinderVolumeBounds>(10*Acts::UnitConstants::mm, 1200*Acts::UnitConstants::mm, 10*Acts::UnitConstants::mm));
+              AddExtraLayer("ExtraECMatLater1", false, &ec, GenerateTranslation(0, 0, 2150*Acts::UnitConstants::mm), std::make_shared<Acts::CylinderVolumeBounds>(24*Acts::UnitConstants::mm, 1200*Acts::UnitConstants::mm, 10*Acts::UnitConstants::mm));
               //AddDiskLayer_and_Material(&ec, "PosTEC6", makeLayer, 2248*Acts::UnitConstants::mm, 80, 7);
               AddDiskLayer_and_Material(&ec, "PosTEC6_1", makeLayer, 2248*Acts::UnitConstants::mm, 80, 7);
               AddDiskLayer_and_Material(&ec, "PosTEC6_2", makeLayer, 2248*Acts::UnitConstants::mm, 80, 7);
-              AddExtraLayer("ExtraECMatLater2", false, &ec, GenerateTranslation(0, 0, 2350*Acts::UnitConstants::mm), std::make_shared<Acts::CylinderVolumeBounds>(10*Acts::UnitConstants::mm, 1200*Acts::UnitConstants::mm, 10*Acts::UnitConstants::mm));
+              AddExtraLayer("ExtraECMatLater2", false, &ec, GenerateTranslation(0, 0, 2350*Acts::UnitConstants::mm), std::make_shared<Acts::CylinderVolumeBounds>(24*Acts::UnitConstants::mm, 1200*Acts::UnitConstants::mm, 10*Acts::UnitConstants::mm));
               //AddDiskLayer_and_Material(&ec, "PosTEC7", makeLayer, 2454*Acts::UnitConstants::mm, 80, 7);
               AddDiskLayer_and_Material(&ec, "PosTEC7_1", makeLayer, 2454*Acts::UnitConstants::mm, 80, 7);
               AddDiskLayer_and_Material(&ec, "PosTEC7_2", makeLayer, 2454*Acts::UnitConstants::mm, 80, 7);
-              AddExtraLayer("ExtraECMatLater3", false, &ec, GenerateTranslation(0, 0, 2550*Acts::UnitConstants::mm), std::make_shared<Acts::CylinderVolumeBounds>(10*Acts::UnitConstants::mm, 1200*Acts::UnitConstants::mm, 10*Acts::UnitConstants::mm));
+              AddExtraLayer("ExtraECMatLater3", false, &ec, GenerateTranslation(0, 0, 2550*Acts::UnitConstants::mm), std::make_shared<Acts::CylinderVolumeBounds>(24*Acts::UnitConstants::mm, 1200*Acts::UnitConstants::mm, 10*Acts::UnitConstants::mm));
 
               AddDiskLayer_and_Material(&ec, "PosTEC8_1", makeLayer, 2666*Acts::UnitConstants::mm, 80, 7);
               ec.addLayer("PosTEC8_2", [&](auto& layer) {
@@ -2069,15 +2069,15 @@ std::shared_ptr<TrackingGeometryWithDetEls> TrackerGeomBuilderWithActsESProducer
             });
 
 
-        AddExtraLayer("extra_ecpos", false, &det, GenerateTranslation(0, 0, 1160*Acts::UnitConstants::mm), std::make_shared<Acts::CylinderVolumeBounds>(10*Acts::UnitConstants::mm, 1200*Acts::UnitConstants::mm, 15*Acts::UnitConstants::mm));
-        AddExtraLayer("extra_ecpos2", false, &det, GenerateTranslation(0, 0, 1210*Acts::UnitConstants::mm), std::make_shared<Acts::CylinderVolumeBounds>(10*Acts::UnitConstants::mm, 1200*Acts::UnitConstants::mm, 15*Acts::UnitConstants::mm));
+        AddExtraLayer("extra_ecpos", false, &det, GenerateTranslation(0, 0, 1160*Acts::UnitConstants::mm), std::make_shared<Acts::CylinderVolumeBounds>(24*Acts::UnitConstants::mm, 1200*Acts::UnitConstants::mm, 15*Acts::UnitConstants::mm));
+        AddExtraLayer("extra_ecpos2", false, &det, GenerateTranslation(0, 0, 1210*Acts::UnitConstants::mm), std::make_shared<Acts::CylinderVolumeBounds>(24*Acts::UnitConstants::mm, 1200*Acts::UnitConstants::mm, 15*Acts::UnitConstants::mm));
            
       });
  
       // CMS.addStaticVolume(base, std::make_shared<Acts::CylinderVolumeBounds>(0*Acts::UnitConstants::mm, 10*Acts::UnitConstants::mm, 3000*Acts::UnitConstants::mm), "BeamPipe");
 
       CMS.addCylinderContainer("BeampipeVolume", Acts::AxisDirection::AxisR, [&](auto& bp) {
-        AddExtraLayer("BeamPipe", true, &bp, GenerateTranslation(0, 0, 0), std::make_shared<Acts::CylinderVolumeBounds>(0*Acts::UnitConstants::mm, 10*Acts::UnitConstants::mm, 3000*Acts::UnitConstants::mm));          
+        AddExtraLayer("BeamPipe", true, &bp, GenerateTranslation(0, 0, 0), std::make_shared<Acts::CylinderVolumeBounds>(0*Acts::UnitConstants::mm, 24*Acts::UnitConstants::mm, 3000*Acts::UnitConstants::mm));          
       });
 
     });

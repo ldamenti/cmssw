@@ -43,7 +43,7 @@ process.trackinGeoProducer = cms.ESProducer("TrackerGeomBuilderWithActsESProduce
     saveSvgfile    = cms.untracked.bool(False),
     outputSvgFile  = cms.untracked.string("CMSPhase1Blueprint.svg"),
     # Option to map the material from a JSON file
-    mapMaterial    = cms.untracked.bool(False), # NOTE: needs to be false while producing the mmaterial maps
+    mapMaterial    = cms.untracked.bool(False), # NOTE: needs to be false while producing the material maps
     MaterialMaps   = cms.untracked.string(""),
 
     ActsLogLevel    = cms.untracked.string("info")
@@ -52,7 +52,7 @@ process.trackinGeoProducer = cms.ESProducer("TrackerGeomBuilderWithActsESProduce
 # ===== Create the Material Maps =====
 process.createMaterialFile = cms.EDProducer("ActsJsonMaterialMapProducer",
     G4InputFile = cms.untracked.string("/eos/user/l/ldamenti/G4MaterialFiles/geant4MaterialFile_1e6Tracks_ActsUnits_WithMyFormula.root"),
-    OutputFile  = cms.untracked.string("/eos/user/l/ldamenti/ForkTest/ActsMaterialMaps_diffG4File.json"),
+    OutputFile  = cms.untracked.string("/eos/user/l/ldamenti/MaterialMaps/MaterialMaps_1e6Tracks_NewBP_FullLayers.json"),
     Nevents = cms.untracked.int32(1000000),    # NOTE: MAX value = number of tracks of the G4 file
     ActsLogLevel    = cms.untracked.string("info")
 )

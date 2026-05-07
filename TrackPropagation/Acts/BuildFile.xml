@@ -1,0 +1,21 @@
+<use name="ofast-flag"/>
+<use name="FWCore/Utilities"/>
+<use name="TrackingTools/GeomPropagators"/>
+<use name="TrackingTools/TrajectoryState"/>
+<use name="TrackingTools/MaterialEffects"/>
+<use name="TrackPropagation/RungeKutta"/>
+<use name="DataFormats/GeometryCommonDetAlgo"/>
+<use name="MagneticField/VolumeBasedEngine"/>
+<use name="Geometry/TrackerGeometryBuilder"/>
+<use name="ActsDataFormats/GeometrySurface"/>
+
+<use name="Geometry/Records"/>
+
+<use name="acts-core"/>
+<use name="acts-json"/>
+<use name="acts-svg"/>
+<use name="acts-root"/>
+
+<export>
+  <lib name="1"/>
+</export>
