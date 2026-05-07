@@ -118,7 +118,7 @@ process.ActsTrackValidator = multiTrackValidator.clone(
     ),
     UseAssociators = cms.bool(True),
 
-    dirName = cms.string("Tracking/ACTS/KshortPionTracking"),
+    dirName = cms.string("Tracking/ACTS/Tracking"),
 
     label = cms.VInputTag(
         cms.InputTag("ActsTrackRefitter")
