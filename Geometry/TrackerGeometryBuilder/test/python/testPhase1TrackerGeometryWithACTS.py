@@ -42,13 +42,13 @@ process.trackinGeoProducer = cms.ESProducer("TrackerGeomBuilderWithActsESProduce
     rangeZ         = cms.untracked.vdouble(-1000, 1000),  # Min, Max (mm)
     rangeR         = cms.untracked.vdouble(0, 1200),      # Min, Max (mm) 
     # Options to save the Tracker blueprint on an SVG file
-    saveSvgfile    = cms.untracked.bool(True),
+    saveSvgfile    = cms.untracked.bool(False),
     outputSvgFile  = cms.untracked.string("CMSPhase1Blueprint.svg"),
     # Option to map the material from a JSON file
     mapMaterial    = cms.untracked.bool(False),
     MaterialMaps   = cms.untracked.string("MaterialMaps.json"),
 
-    ActsLogLevel    = cms.untracked.string("info")
+    ActsLogLevel    = cms.untracked.string("verbose")
 )
 
 process.get = cms.EDAnalyzer("EventSetupRecordDataGetter",

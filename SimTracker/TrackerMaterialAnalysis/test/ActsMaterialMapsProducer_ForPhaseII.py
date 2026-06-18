@@ -51,9 +51,9 @@ process.trackinGeoProducer = cms.ESProducer("TrackerGeomBuilderPh2WithActsESProd
 
 # ===== Create the Material Maps =====
 process.createMaterialFile = cms.EDProducer("ActsJsonMaterialMapProducer",
-    G4InputFile = cms.untracked.string("/eos/user/l/ldamenti/G4MaterialFiles/PhaseII/ph2_geant4MaterialFile_1e6Tracks.root"),
-    OutputFile  = cms.untracked.string("/eos/user/l/ldamenti/MaterialMaps/PhaseII/MaterialMapsPh2_1e6Tracks.json"),
-    Nevents = cms.untracked.int32(1000000),    # NOTE: MAX value = number of tracks of the G4 file
+    G4InputFile = cms.untracked.string("/eos/user/l/ldamenti/G4MaterialFiles/PhaseII/ph2_geant4MaterialFile_2e6Tracks.root"),
+    OutputFile  = cms.untracked.string("/eos/user/l/ldamenti/MaterialMaps/PhaseII/MaterialMapsPh2_2e6Tracks_100binsUniform.json"),
+    Nevents = cms.untracked.int32(2000000),    # NOTE: MAX value = number of tracks of the G4 file
     ActsLogLevel    = cms.untracked.string("info")
 )
 

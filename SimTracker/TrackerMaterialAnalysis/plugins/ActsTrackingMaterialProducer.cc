@@ -338,6 +338,7 @@ bool ActsTrackingMaterialProducer::isSelectedFast(const G4TouchableHistory* touc
 //-------------------------------------------------------------------------
 void ActsTrackingMaterialProducer::update(const G4Step* step) {
   const G4TouchableHistory* touchable = static_cast<const G4TouchableHistory*>(step->GetTrack()->GetTouchable());
+  // std::cout << "[DEBUG] We're in: " << touchable->GetVolume()->GetName() << std::endl;
   if (not isSelectedFast(touchable)) {
     LogInfo("ActsTrackingMaterialProducer") << "ActsTrackingMaterialProducer:\t[...] skipping "
                                         << touchable->GetVolume()->GetName() << std::endl;

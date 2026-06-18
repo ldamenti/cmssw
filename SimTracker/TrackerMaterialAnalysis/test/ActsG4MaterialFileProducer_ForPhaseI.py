@@ -42,7 +42,7 @@ process.load("SimTracker.TrackerMaterialAnalysis.ActsTrackingMaterialProducer_cf
 #For some reason now neutrino are no longer tracked, so we need to force it.
 process.trackingMaterialProducer.StackingAction.TrackNeutrino = True
 process.trackingMaterialProducer.Generator.HepMCProductLabel = cms.InputTag("generatorSmeared")
-process.trackingMaterialProducer.Watchers[0].ActsTrackingMaterialProducer.SelectedVolumes = cms.vstring('BEAM_1','Tracker_1')
+process.trackingMaterialProducer.Watchers[0].ActsTrackingMaterialProducer.SelectedVolumes = cms.vstring('BEAM_1', 'BEAM_2','Tracker_1')
 process.trackingMaterialProducer.Watchers[0].ActsTrackingMaterialProducer.ActsOutputFileName = cms.string("/eos/user/l/ldamenti/ForkTest/geant4MaterialFile.root")
 
 process.maxEvents = cms.untracked.PSet(

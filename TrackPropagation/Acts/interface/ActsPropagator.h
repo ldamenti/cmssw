@@ -10,6 +10,7 @@
 #include "DataFormats/GeometrySurface/interface/PlaneBuilder.h"
 
 #include "TrackPropagation/Acts/interface/ActsConcretePropagator.h"
+#include "TrackPropagation/Acts/interface/ComputeFreeJacobian.h"
 
 // - Acts
 #include "ActsDataFormats/GeometrySurface/interface/CMSMagneticFieldProvider.hpp"
@@ -62,11 +63,14 @@ public:
   std::pair<TrajectoryStateOnSurface, double> propagateWithPath(const TrajectoryStateOnSurface &,
                                                                 const Cylinder &) const override;
 
+  FreeTrajectoryState propagateWithPathToPerigeeInsideBP(const TrajectoryStateOnSurface& tsos) const;
+
   ActsPropagator *clone() const override { return new ActsPropagator(*this); }
 
   const MagneticField *magneticField() const override { return field; }
 
-private:
+
+  private:
 
   // helpfull methods to be used during the propagation:
   std::shared_ptr<const Acts::Surface> inflateStartPlaneIfRectOrTrap(const Acts::Surface& targetSurf, const Acts::GeometryContext& gctx, double marginMm) const;

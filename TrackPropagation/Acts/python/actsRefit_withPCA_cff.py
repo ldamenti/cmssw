@@ -50,7 +50,7 @@ from RecoTracker.TrackProducer.TrackRefitters_cff import *
 
 # configure the refitter with the Acts propagator
 # automatically uses the generalTracks collection as input
-ActsTrackRefitter = TrackRefitter.clone()
+ActsTrackRefitter = TrackActsRefitter.clone() # USES THE CUSTOM ALGORTHM 
 ActsTrackRefitter.src = cms.InputTag("generalTracks")
 ActsTrackRefitter.Fitter = cms.string('ActsFitterSmoother')
 ActsTrackRefitter.Propagator = cms.string('ActsPropagator')

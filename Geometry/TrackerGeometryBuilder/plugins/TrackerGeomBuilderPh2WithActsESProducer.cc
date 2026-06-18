@@ -165,11 +165,11 @@ namespace {
 
       gap.addMaterial(gapName.c_str(), [&](Acts::Experimental::MaterialDesignatorBlueprintNode& mat){
         if(!isBarrel){
-          mat.configureFace(Acts::CylinderVolumeBounds::Face::NegativeDisc, {Acts::AxisDirection::AxisR, Acts::AxisBoundaryType::Bound, 200}, {Acts::AxisDirection::AxisPhi, Acts::AxisBoundaryType::Bound, 200});
-          mat.configureFace(Acts::CylinderVolumeBounds::Face::PositiveDisc, {Acts::AxisDirection::AxisR, Acts::AxisBoundaryType::Bound, 200}, {Acts::AxisDirection::AxisPhi, Acts::AxisBoundaryType::Bound, 200});
+          mat.configureFace(Acts::CylinderVolumeBounds::Face::NegativeDisc, {Acts::AxisDirection::AxisR, Acts::AxisBoundaryType::Bound, 100}, {Acts::AxisDirection::AxisPhi, Acts::AxisBoundaryType::Bound, 100});
+          mat.configureFace(Acts::CylinderVolumeBounds::Face::PositiveDisc, {Acts::AxisDirection::AxisR, Acts::AxisBoundaryType::Bound, 100}, {Acts::AxisDirection::AxisPhi, Acts::AxisBoundaryType::Bound, 100});
         }
         else{
-          mat.configureFace(Acts::CylinderVolumeBounds::Face::OuterCylinder, {Acts::AxisDirection::AxisRPhi, Acts::AxisBoundaryType::Bound, 200}, {Acts::AxisDirection::AxisZ, Acts::AxisBoundaryType::Bound, 200});                  
+          mat.configureFace(Acts::CylinderVolumeBounds::Face::OuterCylinder, {Acts::AxisDirection::AxisRPhi, Acts::AxisBoundaryType::Bound, 100}, {Acts::AxisDirection::AxisZ, Acts::AxisBoundaryType::Bound, 100});                  
         }
 
         mat.addCylinderContainer(gapName.c_str(), Acts::AxisDirection::AxisZ, [&](auto& L) {
@@ -220,30 +220,11 @@ namespace {
                                 double bin1){
     
       std::string matName = LayerName + "_Material";
-
-      const bool isTilted = LayerName.find("Tilted") != std::string::npos;
-      const bool isPosTilted = LayerName.find("PosTilted") != std::string::npos;
-      const bool isNegTilted = LayerName.find("NegTilted") != std::string::npos;
-
+      
       cont->addMaterial(matName.c_str(), [&](Acts::Experimental::MaterialDesignatorBlueprintNode& mat) {
-        // if (isTilted) {       
-        //   if (isPosTilted) {
-        //     // Positive tilted disk: material only on negative-z face
-        //     mat.configureFace(Acts::CylinderVolumeBounds::Face::PositiveDisc,{Acts::AxisDirection::AxisR, Acts::AxisBoundaryType::Bound, 200},{Acts::AxisDirection::AxisPhi, Acts::AxisBoundaryType::Bound, 200});
-        //     mat.configureFace(Acts::CylinderVolumeBounds::Face::NegativeDisc,{Acts::AxisDirection::AxisR, Acts::AxisBoundaryType::Bound, 200},{Acts::AxisDirection::AxisPhi, Acts::AxisBoundaryType::Bound, 200});
-        //   } else if (isNegTilted) {
-        //     // Negative tilted disk: material only on positive-z face
-        //     mat.configureFace(Acts::CylinderVolumeBounds::Face::PositiveDisc,{Acts::AxisDirection::AxisR, Acts::AxisBoundaryType::Bound, 200},{Acts::AxisDirection::AxisPhi, Acts::AxisBoundaryType::Bound, 200});
-        //   }
-        // } else {
-        //   // Normal disk layer
-        //   mat.configureFace(Acts::CylinderVolumeBounds::Face::NegativeDisc,{Acts::AxisDirection::AxisR, Acts::AxisBoundaryType::Bound, 200},{Acts::AxisDirection::AxisPhi, Acts::AxisBoundaryType::Bound, 200});
-        //   mat.configureFace(Acts::CylinderVolumeBounds::Face::PositiveDisc,{Acts::AxisDirection::AxisR, Acts::AxisBoundaryType::Bound, 200},{Acts::AxisDirection::AxisPhi, Acts::AxisBoundaryType::Bound, 200});
-        // }
-
         // Normal disk layer
-        mat.configureFace(Acts::CylinderVolumeBounds::Face::NegativeDisc,{Acts::AxisDirection::AxisR, Acts::AxisBoundaryType::Bound, 200},{Acts::AxisDirection::AxisPhi, Acts::AxisBoundaryType::Bound, 200});
-        mat.configureFace(Acts::CylinderVolumeBounds::Face::PositiveDisc,{Acts::AxisDirection::AxisR, Acts::AxisBoundaryType::Bound, 200},{Acts::AxisDirection::AxisPhi, Acts::AxisBoundaryType::Bound, 200});
+        mat.configureFace(Acts::CylinderVolumeBounds::Face::NegativeDisc,{Acts::AxisDirection::AxisR, Acts::AxisBoundaryType::Bound, 100},{Acts::AxisDirection::AxisPhi, Acts::AxisBoundaryType::Bound, 100});
+        mat.configureFace(Acts::CylinderVolumeBounds::Face::PositiveDisc,{Acts::AxisDirection::AxisR, Acts::AxisBoundaryType::Bound, 100},{Acts::AxisDirection::AxisPhi, Acts::AxisBoundaryType::Bound, 100});
         
 
         mat.addCylinderContainer(LayerName, Acts::AxisDirection::AxisZ, [&](auto& L) {
@@ -264,13 +245,8 @@ namespace {
     Acts::Transform3 base{Acts::Transform3::Identity()};
 
     cont->addMaterial(matName.c_str(), [&](Acts::Experimental::MaterialDesignatorBlueprintNode& mat) {
-                      // const bool test = LayerName.find("TBPS") != std::string::npos;
-                      // if(!test) {
-                      //   mat.configureFace(Acts::CylinderVolumeBounds::Face::OuterCylinder, {Acts::AxisDirection::AxisRPhi, Acts::AxisBoundaryType::Bound, 200}, {Acts::AxisDirection::AxisZ, Acts::AxisBoundaryType::Bound, 200});
-                      //   mat.configureFace(Acts::CylinderVolumeBounds::Face::InnerCylinder, {Acts::AxisDirection::AxisRPhi, Acts::AxisBoundaryType::Bound, 200}, {Acts::AxisDirection::AxisZ, Acts::AxisBoundaryType::Bound, 200});  
-                      // }
-                      mat.configureFace(Acts::CylinderVolumeBounds::Face::OuterCylinder, {Acts::AxisDirection::AxisRPhi, Acts::AxisBoundaryType::Bound, 200}, {Acts::AxisDirection::AxisZ, Acts::AxisBoundaryType::Bound, 200});
-                      mat.configureFace(Acts::CylinderVolumeBounds::Face::InnerCylinder, {Acts::AxisDirection::AxisRPhi, Acts::AxisBoundaryType::Bound, 200}, {Acts::AxisDirection::AxisZ, Acts::AxisBoundaryType::Bound, 200});  
+                      mat.configureFace(Acts::CylinderVolumeBounds::Face::OuterCylinder, {Acts::AxisDirection::AxisRPhi, Acts::AxisBoundaryType::Bound, 100}, {Acts::AxisDirection::AxisZ, Acts::AxisBoundaryType::Bound, 100});
+                      mat.configureFace(Acts::CylinderVolumeBounds::Face::InnerCylinder, {Acts::AxisDirection::AxisRPhi, Acts::AxisBoundaryType::Bound, 100}, {Acts::AxisDirection::AxisZ, Acts::AxisBoundaryType::Bound, 100});  
                       
                       
                       mat.addCylinderContainer(LayerName, Acts::AxisDirection::AxisR, [&](auto& L) {

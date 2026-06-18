@@ -22,6 +22,12 @@
 #include <optional>
 #include <iterator>
 
+struct InfiniteBoundaryForcedSurfaceReached : Acts::ForcedSurfaceReached {
+  InfiniteBoundaryForcedSurfaceReached() {
+    boundaryTolerance = Acts::BoundaryTolerance::Infinite();
+  }
+};
+
 // DEBUG
 static std::string surfaceType(const Acts::Surface& s) {
   using Acts::Surface;
@@ -253,7 +259,7 @@ struct PropagationAlgorithm_Config {
   /// Modify the behavior of the material interaction: record
   bool recordMaterialInteractions = true;
   /// looper protection
-  double ptLoopers = 1 * Acts::UnitConstants::MeV;
+  double ptLoopers = 500 * Acts::UnitConstants::MeV;
   /// Max step size steering
   double maxStepSize = 1 * Acts::UnitConstants::m; 
   /// Max path limit
@@ -307,7 +313,7 @@ class ConcretePropagator {
     ACTS_DEBUG("Test propagation/extrapolation starts");
 
     ACTS_VERBOSE("Starting propagation with these initial parameters: \n" << 
-                 "Position: " << startParameters.position(Acts::GeometryContext{}).transpose() << "\n" <<
+                 "Position: " << getActsPosition(startParameters, Acts::GeometryContext{}).transpose() << "\n" <<
                  "Direction: " << startParameters.direction().transpose()); 
     ACTS_VERBOSE("Propagating to target surface of type " << targetSurf.type() << 
                  " and position " <<  targetSurf.center(Acts::GeometryContext{}).transpose());
@@ -323,9 +329,9 @@ class ConcretePropagator {
     // 
 
     // Actor list
-    using TargetAborter = Acts::ForcedSurfaceReached;
-    using ActorList = Acts::ActorList<SteppingLogger, MaterialInteractor, TargetAborter, EndOfWorld>;
-    // using ActorList = Acts::ActorList<SteppingLogger, MaterialInteractor, EndOfWorld>;
+    // using TargetAborter = Acts::ForcedSurfaceReached;
+    // using ActorList = Acts::ActorList<SteppingLogger, MaterialInteractor, TargetAborter, EndOfWorld>;
+    using ActorList = Acts::ActorList<SteppingLogger, MaterialInteractor, EndOfWorld>;
     using PropagatorOptions = typename propagator_t::template Options<ActorList>;
 
     PropagatorOptions options(Acts::GeometryContext{}, Acts::MagneticFieldContext{});
@@ -435,10 +441,10 @@ class ConcretePropagator {
 
     //auto propRes = m_propagator.propagate(startParameters, *targetToUse, options);
 
-    auto& targetAborter = options.actorList.template get<TargetAborter>();
-    targetAborter.surface = targetToUse;
-    targetAborter.nearLimit = -200 * Acts::UnitConstants::um;
-    targetAborter.boundaryTolerance = Acts::BoundaryTolerance::Infinite();
+    // auto& targetAborter = options.actorList.template get<TargetAborter>();
+    // targetAborter.surface = targetToUse;
+    // targetAborter.nearLimit = -200 * Acts::UnitConstants::um;
+    // targetAborter.boundaryTolerance = Acts::BoundaryTolerance::Infinite();
     
 
     //if(precheck->insideBounds) {
@@ -447,10 +453,11 @@ class ConcretePropagator {
     // from: https://github.com/acts-project/acts/blob/52492222b450e23064ccf9a977b61f5781916675/Core/include/Acts/Propagator/Propagator.ipp#L413-L416
     // defined here: https://github.com/acts-project/acts/blob/52492222b450e23064ccf9a977b61f5781916675/Core/include/Acts/Propagator/StandardAborters.hpp#L159-L165
     
-    
+    // auto propRes = m_propagator.template propagate<StartParameters,
+    //                                               PropagatorOptions>(startParameters, *targetToUse, options);
     auto propRes = m_propagator.template propagate<StartParameters,
-                                                  PropagatorOptions>(startParameters, *targetToUse, options);
-    // auto propRes = m_propagator.template propagate<StartParameters, PropagatorOptions>(startParameters, options);
+                                                    PropagatorOptions,
+                                                    InfiniteBoundaryForcedSurfaceReached>(startParameters, *targetToUse, options);
     
     if (!propRes.ok() || !propRes->endParameters) {
       ACTS_VERBOSE("Propagator Failed! Returning nullopt");
@@ -522,6 +529,14 @@ class ConcretePropagator {
 
  private:
   propagator_t m_propagator;
+  template <typename ParametersT>
+  static Acts::Vector3 getActsPosition(const ParametersT& pars, const Acts::GeometryContext& gctx) {
+    if constexpr (std::is_same_v<ParametersT, Acts::FreeTrackParameters>) {
+      return pars.position();
+    } else {
+      return pars.position(gctx);
+    }
+  }
 };
 
 #endif

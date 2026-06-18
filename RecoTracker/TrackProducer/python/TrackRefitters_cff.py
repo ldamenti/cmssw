@@ -7,6 +7,7 @@ from RecoTracker.Configuration.RecoTrackerP5_cff import *
 from RecoTracker.Configuration.RecoTrackerBHM_cff import *
 
 from RecoTracker.TrackProducer.TrackRefitter_cfi import *
+from RecoTracker.TrackProducer.TrackActsRefitter_cfi import *
 from RecoTracker.TrackProducer.TrackRefitterP5_cfi import *
 from RecoTracker.TrackProducer.TrackRefitterBHM_cfi import *
 

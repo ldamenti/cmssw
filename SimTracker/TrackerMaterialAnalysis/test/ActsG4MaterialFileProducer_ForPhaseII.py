@@ -32,10 +32,10 @@ process.load("SimTracker.TrackerMaterialAnalysis.ActsTrackingMaterialProducer_cf
 process.trackingMaterialProducer.StackingAction.TrackNeutrino = True
 process.trackingMaterialProducer.Generator.HepMCProductLabel = cms.InputTag("generatorSmeared")
 process.trackingMaterialProducer.Watchers[0].ActsTrackingMaterialProducer.SelectedVolumes = cms.vstring('BEAM_1', 'BEAM_2', 'Tracker_1')
-process.trackingMaterialProducer.Watchers[0].ActsTrackingMaterialProducer.ActsOutputFileName = cms.string("/eos/user/l/ldamenti/G4MaterialFiles/PhaseII/ph2_geant4MaterialFile_1e6Tracks.root")
+process.trackingMaterialProducer.Watchers[0].ActsTrackingMaterialProducer.ActsOutputFileName = cms.string("/eos/user/l/ldamenti/G4MaterialFiles/PhaseII/ph2_geant4MaterialFile_4e6Tracks.root")
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1000000)
+    input = cms.untracked.int32(2000000)
 )
 
 # Input source

@@ -14,6 +14,7 @@
 #include "TrackingTools/AnalyticalJacobians/interface/AnalyticalCurvilinearJacobian.h"
 
 #include "TrackPropagation/Acts/interface/ComputeLocalBoundJacobian.h"
+#include "Acts/Surfaces/PerigeeSurface.hpp"
 
 // CLHEP
 #include <CLHEP/Units/SystemOfUnits.h>
@@ -30,30 +31,9 @@ namespace {
 }
 
 Acts::SquareMatrix3 localToGlobalRotation(const Surface& surf) {
-  const GlobalPoint  g0  = surf.toGlobal(LocalPoint(0., 0.));
-  const GlobalPoint  g1x = surf.toGlobal(LocalPoint(1., 0.));
-  const GlobalPoint  g1y = surf.toGlobal(LocalPoint(0., 1.));
-
-  GlobalVector gx = (g1x - g0).unit();
-  GlobalVector gy = (g1y - g0).unit();
-
-  // z da prodotto vettoriale (può avere verso ambiguo)
-  GlobalVector gz = gx.cross(gy).unit();
-  gy = gz.cross(gx).unit(); // ri-ortogonalizza
-
-  // *** FIX: forza gz ad avere lo stesso verso del "vero" z locale CMSSW ***
-  // Se gz è il +z locale, allora surf.toLocal(gz) dovrebbe avere componente z positiva.
-  // LocalVector zLoc = surf.toLocal(GlobalVector(gz.x(), gz.y(), gz.z()));
-  // if (zLoc.z() < 0) {
-  //   gz = GlobalVector(-gz.x(), -gz.y(), -gz.z());
-  //   gy = GlobalVector(-gy.x(), -gy.y(), -gy.z());  // per mantenere terna destrorsa con gx
-  // }
-  // *** END FIX ***
-  LocalVector zLoc = surf.toLocal(GlobalVector(gz.x(), gz.y(), gz.z()));
-  if (zLoc.z() < 0) {
-    gz = -gz;
-    gy = -gy;
-  }
+  GlobalVector gx = surf.toGlobal(LocalVector(1., 0., 0.)).unit();
+  GlobalVector gy = surf.toGlobal(LocalVector(0., 1., 0.)).unit();
+  GlobalVector gz = surf.toGlobal(LocalVector(0., 0., 1.)).unit();
 
   Acts::SquareMatrix3 R;
   R(0,0)=gx.x(); R(1,0)=gx.y(); R(2,0)=gx.z();
@@ -191,68 +171,6 @@ LocalTrajectoryParameters ActsPropagator::GetLocalTrajectoryParameters(const Act
   return LocalTrajectoryParameters(qop, dxdz, dydz, lp.x(), lp.y(), pzSign, true);
 }
 
-
-// LocalTrajectoryParameters ActsPropagator::GetLocalTrajectoryParameters(
-//     const Acts::BoundTrackParameters& pActs,
-//     const Surface& surf) const {
-
-//   const auto& pars = pActs.parameters();
-
-//   const double loc0 = pars[Acts::eBoundLoc0];
-//   const double loc1 = pars[Acts::eBoundLoc1];
-//   const double qop  = pars[Acts::eBoundQOverP];
-
-//   // ACTS local position [mm] -> CMSSW [cm]
-//   LocalPoint lp(loc0 * 0.1, loc1 * 0.1);
-
-//   // Usa la direzione ACTS finale direttamente
-//   const auto dirA = pActs.direction();
-//   GlobalVector dirG(dirA[0], dirA[1], dirA[2]);
-
-//   // Porta la direzione nel frame locale CMSSW della surface target
-//   LocalVector dirL = surf.toLocal(dirG);
-
-//   // Protezione da uz ~ 0
-//   const double uz = dirL.z();
-//   const double uz_safe = (std::abs(uz) < 1e-12) ? std::copysign(1e-12, (uz == 0. ? 1. : uz)) : uz;
-
-//   const double dxdz = dirL.x() / uz_safe;
-//   const double dydz = dirL.y() / uz_safe;
-
-//   const float pzSign = (uz >= 0.) ? +1.f : -1.f;
-
-//   // std::cout << "\n[DBG LTP]"
-//   //         << " loc=(" << lp.x() << "," << lp.y() << ")"
-//   //         << " dirG=(" << dirG.x() << "," << dirG.y() << "," << dirG.z() << ")"
-//   //         << " dirL=(" << dirL.x() << "," << dirL.y() << "," << dirL.z() << ")"
-//   //         << " dxdz=" << dxdz
-//   //         << " dydz=" << dydz
-//   //         << " pzSign=" << pzSign
-//   //         << "\n";
-
-//   // const GlobalPoint g0  = surf.toGlobal(LocalPoint(0., 0.));
-//   // const GlobalPoint g1x = surf.toGlobal(LocalPoint(1., 0.));
-//   // const GlobalPoint g1y = surf.toGlobal(LocalPoint(0., 1.));
-
-//   // GlobalVector exCms = (g1x - g0).unit();
-//   // GlobalVector eyCms = (g1y - g0).unit();
-//   // GlobalVector nCms  = exCms.cross(eyCms).unit();
-
-//   // std::cout << "\n[CMSSW normal] "
-//   //           << nCms.x() << " "
-//   //           << nCms.y() << " "
-//   //           << nCms.z() << "\n";
-
-//   // const auto& refSurfACTS = pActs.referenceSurface();
-//   // auto nActs = refSurfACTS.normal(Acts::GeometryContext{}, Acts::Vector3{loc0, loc1, 0.}, pActs.direction());
-//   // std::cout << "\n[ACTS normal] "
-//   //           << nActs[0] << " "
-//   //           << nActs[1] << " "
-//   //           << nActs[2] << "\n";
-
-//   return LocalTrajectoryParameters(qop, dxdz, dydz, lp.x(), lp.y(), pzSign, true);
-// }
-
 const Local2DPoint center(0.,0.); 
 const Local3DPoint locz(0.,0.,1.);
 const Local3DPoint locx(1.,0.,0.);
@@ -277,10 +195,21 @@ std::shared_ptr<const Acts::Surface> ActsPropagator::buildTargetSurf(const Surfa
 
   dxV.normalize();
   dyV.normalize();
-  dxV = dxV - dxV.dot(dVz) * dVz; // make dxV ortogonal to dz
   dVz.normalize();
 
-  dyV = dVz.cross(dxV);  // make dy ortogonal to dx e dz
+  // orthogonalize x to z
+  dxV = dxV - dxV.dot(dVz) * dVz;
+  dxV.normalize();
+
+  // orthogonalize y to z and x
+  dyV = dyV - dyV.dot(dVz) * dVz;
+  dyV = dyV - dyV.dot(dxV) * dxV;
+  dyV.normalize();
+
+  // enforce right-handed frame without changing x/z
+  if (dxV.cross(dyV).dot(dVz) < 0.) {
+    dyV = -dyV;
+  }
 
   Eigen::Matrix3d Rot;
   Rot.col(0) = dxV;
@@ -387,18 +316,40 @@ std::shared_ptr<const Acts::Surface> ActsPropagator::buildTargetSurf(const Surfa
     acts_surf = Acts::Surface::makeShared<Acts::CylinderSurface>(trf, targetR_mm, halfZ_mm);
   }
 
-  if(!boundFound){
-    ACTS_VERBOSE("Surface bounds not found! Building a surface with custom rectangular bounds.");
-    const std::size_t kValues = Acts::RectangleBounds::BoundValues::eSize;
-    std::array<double, kValues> bValues{};
-    std::vector<double> bVector = {-50 * Acts::UnitConstants::mm,  // cm → mm
-                                   -50 * Acts::UnitConstants::mm,
-                                    50 * Acts::UnitConstants::mm,
-                                    50 * Acts::UnitConstants::mm};
+  if (!boundFound) {
+    ACTS_VERBOSE("Surface bounds not found! Building fallback PlaneSurface.");
 
-    std::copy_n(bVector.begin(), kValues, bValues.begin());
-    acts_surf = Acts::Surface::makeShared<Acts::PlaneSurface>(t, std::move(std::make_shared<const Acts::RectangleBounds>(bValues)));   
+    GlobalPoint g0 = cmssw_surf.toGlobal(LocalPoint(0., 0., 0.));
+    GlobalPoint gx = cmssw_surf.toGlobal(LocalPoint(1., 0., 0.));
+    GlobalPoint gy = cmssw_surf.toGlobal(LocalPoint(0., 1., 0.));
+
+    Acts::Vector3 O(g0.x() * 10., g0.y() * 10., g0.z() * 10.);
+
+    Acts::Vector3 X((gx.x() - g0.x()) * 10.,
+                    (gx.y() - g0.y()) * 10.,
+                    (gx.z() - g0.z()) * 10.);
+    Acts::Vector3 Y((gy.x() - g0.x()) * 10.,
+                    (gy.y() - g0.y()) * 10.,
+                    (gy.z() - g0.z()) * 10.);
+
+    X.normalize();
+    Y = Y - Y.dot(X) * X;
+    Y.normalize();
+
+    Acts::Vector3 Z = X.cross(Y);
+    Z.normalize();
+
+    Acts::Transform3 tFixed = Acts::Transform3::Identity();
+    tFixed.linear().col(0) = X;
+    tFixed.linear().col(1) = Y;
+    tFixed.linear().col(2) = Z;
+    tFixed.translation() = O;
+
+    auto bounds = std::make_shared<const Acts::RectangleBounds>(500.0, 500.0);
+
+    acts_surf = Acts::Surface::makeShared<Acts::PlaneSurface>(tFixed, bounds);
   }
+
 
   auto t_final = acts_surf->transform(Acts::GeometryContext{});
   auto b_values = acts_surf->bounds().values();
@@ -543,22 +494,43 @@ TrajectoryStateOnSurface ActsPropagator::boundFreeTrajectoryState(const FreeTraj
   ACTS_VERBOSE("Bound Input FreeTrajectoryState to a planar start surface");
   // Get momentum and position of the fts
   GlobalPoint  pos = fts.position();
+  GlobalVector mom = fts.momentum();
 
-  // Generate the ortogonal local frame system of the plane
-  /// NOTE: as defined in https://github.com/cms-sw/cmssw/blob/7a8df40ec95f56efec1c0596201f0827d0fa49ff/TrackingTools/PatternTools/src/TransverseImpactPointExtrapolator.cc#L98
-  //x is perpendicular to the momentum
-  GlobalVector xLocal = GlobalVector(-fts.momentum().y(), fts.momentum().x(), 0).unit();
-  //y along global Z
-  GlobalVector yLocal(0., 0., 1.);
-  //z accordingly
-  GlobalVector zLocal(xLocal.cross(yLocal));
-  const Surface::PositionType& surfPos(pos);
-  Surface::RotationType rotation(xLocal, yLocal, zLocal);
+  GlobalVector zLocal = mom.unit(); // Local z direction parallel to particle momentum 
+
+  GlobalVector xLocal;
+  double pt = std::sqrt(mom.x() * mom.x() + mom.y() * mom.y());
+  // Safety check: if the track is ~ along z (i.e. pt << 1) use the fallback
+  if (pt > 1e-6) {
+    // XX = (py, -px, 0), perpendicular to momentum in transverse plane
+    xLocal = GlobalVector(mom.y(), -mom.x(), 0).unit();
+  } else {
+    // Fallback for nearly z-parallel tracks
+    // Choose any global axis not parallel to zLocal
+    xLocal = GlobalVector(1., 0., 0.);
+  }
+
+  GlobalVector yLocal = zLocal.cross(xLocal).unit();
+
+  // Recompute xLocal to guarantee exact orthonormal right-handed frame.
+  xLocal = yLocal.cross(zLocal).unit();
+
+  const Surface::PositionType surfPos(pos);
+  const Surface::RotationType rotation(xLocal, yLocal, zLocal);
   ReferenceCountingPointer<Plane> surface = PlaneBuilder().plane(surfPos, rotation);
 
   // Bound the fts to the plane
   TrajectoryStateOnSurface newTsos(fts, *surface);
 
+  // DEBUG
+  // LocalVector dL = newTsos.surface().toLocal(newTsos.globalDirection().unit());
+  // std::cout << "eta=" << newTsos.globalDirection().eta()
+  //           << " dirL=(" << dL.x() << "," << dL.y() << "," << dL.z() << ")"
+  //           << " tx=" << newTsos.localParameters().dxdz()
+  //           << " ty=" << newTsos.localParameters().dydz()
+  //           << "\n";
+  // DEBUG 
+  
   // {
   //   LocalVector dL = newTsos.surface().toLocal(newTsos.globalDirection().unit());
   //   std::cout << "\n[BOUND FTS CHECK]\n"
@@ -666,26 +638,6 @@ std::pair<TrajectoryStateOnSurface, double> ActsPropagator::propagateWithPath(co
   auto newTsosWP_FromACTS = propagateWithPath(tsos, cDest);
 
   return newTsosWP_FromACTS;
-
-
-  // // ################## TO BE CHANGED WHEN INCLUDING OTHER RECO STEPS ##################                                                                              
-  // // ===== Get parameters from FreeTrajectoryState =====
-  // ACTS_VERBOSE("Method called: 2");
-  // GlobalPoint gPoint = fts.position();
-  // GlobalVector gMomentum = fts.momentum();
-  // double qOverP = fts.signedInverseMomentum();
-  // // const auto& curvErr = fts.curvilinearError(); // TEMPORARY
-  // // AlgebraicSymMatrix55 covMat_cmssw_init = curvErr.matrix(); // TEMPORARY  
-
-  // Acts::Vector4 pos4 = {gPoint.x()*10, gPoint.y()*10, gPoint.z()*10, 0};
-  // Acts::Vector3 dir = {gMomentum.x(), gMomentum.y(), gMomentum.z()};
-  // dir.normalize();
-  // // Acts::BoundMatrix covMat_acts_init = convertCovCMSSWtoACTS(covMat_cmssw_init);
-  // Acts::BoundMatrix covMat_acts_init = Acts::BoundMatrix::Identity() * 1e-3; // TEMPORARY
-
-  // auto start_param = Acts::BoundTrackParameters::createCurvilinear(pos4, dir, qOverP, covMat_acts_init, Acts::ParticleHypothesis::muon()); // TEMPORARY
-
-  // return tsosWithPathFromActs(start_param, cDest, actsPropDir_);
 }
 
 std::pair<TrajectoryStateOnSurface, double> ActsPropagator::propagateWithPath(const TrajectoryStateOnSurface &tsos, 
@@ -713,30 +665,6 @@ std::pair<TrajectoryStateOnSurface, double> ActsPropagator::propagateWithPath(co
   const auto& localErr = tsos.localError();
   AlgebraicSymMatrix55 covMat_cmssw_init = localErr.matrix(); 
   
-  // DEBUG
-  {
-    const auto& lp = tsos.localParameters();
-    GlobalVector dG = tsos.globalDirection().unit();
-    LocalVector dL = tsos.surface().toLocal(dG);
-
-    const double uz = dL.z();
-    const double tx = lp.dxdz();
-    const double ty = lp.dydz();
-
-    // if (std::abs(uz) < 5e-2 || std::abs(tx) > 10. || std::abs(ty) > 10.) {
-    //   std::cout << "\n[BAD INPUT TSOS LOCAL PARAMS]\n"
-    //             << "  tx=" << tx << " ty=" << ty << "\n"
-    //             << "  uz=" << uz
-    //             << " dirL=(" << dL.x() << "," << dL.y() << "," << dL.z() << ")\n"
-    //             << "  global pos=" << tsos.globalPosition() << "\n"
-    //             << "  global dir=" << tsos.globalDirection() << "\n"
-    //             << "  surface pos=" << tsos.surface().position() << "\n"
-    //             << "  target pos=" << pDest.position() << "\n";
-    // }
-  }
-  // END DEBUG
-
-
   // ===== Use the CMSSW parameters to define the ACTS ones =====
   Acts::Vector4 pos4 = {gPoint.x()*10, gPoint.y()*10, gPoint.z()*10, 0};
   Acts::Vector3 dir = {gDir.x(), gDir.y(), gDir.z()};
@@ -755,66 +683,7 @@ std::pair<TrajectoryStateOnSurface, double> ActsPropagator::propagateWithPath(co
     startToUse = buildTargetSurf(tsos.surface());
   }
 
-  // DEBUG
-  // // ===== CMSSW local frame =====
-  // const auto& surf = tsos.surface();
-  // GlobalPoint g0_cm   = surf.toGlobal(LocalPoint(0.,0.));
-  // GlobalPoint g1x_cm  = surf.toGlobal(LocalPoint(1.,0.));
-  // GlobalPoint g1y_cm  = surf.toGlobal(LocalPoint(0.,1.));
-
-  // GlobalVector ex_cm = (g1x_cm - g0_cm).unit();
-  // GlobalVector ey_cm = (g1y_cm - g0_cm).unit();
-  // GlobalVector ez_cm = ex_cm.cross(ey_cm).unit();
-
-  // std::cout << "\n[DBG SURF 1] CMSSW FRAME\n";
-  // std::cout << "origin_cm = " << g0_cm.x() << " " << g0_cm.y() << " " << g0_cm.z() << "\n";
-  // std::cout << "ex_cm     = " << ex_cm.x() << " " << ex_cm.y() << " " << ex_cm.z() << "\n";
-  // std::cout << "ey_cm     = " << ey_cm.x() << " " << ey_cm.y() << " " << ey_cm.z() << "\n";
-  // std::cout << "ez_cm     = " << ez_cm.x() << " " << ez_cm.y() << " " << ez_cm.z() << "\n";
-
-  // // ===== ACTS local frame =====
-  // auto T = startToUse->transform(Acts::GeometryContext{});
-  // auto Oa = T.translation();
-  // auto ex_a = T.rotation().col(0);
-  // auto ey_a = T.rotation().col(1);
-  // auto ez_a = T.rotation().col(2);
-
-  // std::cout << "\n[DBG SURF 2] ACTS FRAME\n";
-  // std::cout << "origin_a [mm] = " << Oa.transpose() << "\n";
-  // std::cout << "ex_a          = " << ex_a.transpose() << "\n";
-  // std::cout << "ey_a          = " << ey_a.transpose() << "\n";
-  // std::cout << "ez_a          = " << ez_a.transpose() << "\n";
-
-  // std::cout << "\n[DBG SURF 3] FRAME OVERLAPS\n";
-  // std::cout << "ex_cm·ex_a = " << (ex_cm.x()*ex_a(0) + ex_cm.y()*ex_a(1) + ex_cm.z()*ex_a(2)) << "\n";
-  // std::cout << "ey_cm·ey_a = " << (ey_cm.x()*ey_a(0) + ey_cm.y()*ey_a(1) + ey_cm.z()*ey_a(2)) << "\n";
-  // std::cout << "ez_cm·ez_a = " << (ez_cm.x()*ez_a(0) + ez_cm.y()*ez_a(1) + ez_cm.z()*ez_a(2)) << "\n";
-
-  // std::cout << "ex_cm·ey_a = " << (ex_cm.x()*ey_a(0) + ex_cm.y()*ey_a(1) + ex_cm.z()*ey_a(2)) << "\n";
-  // std::cout << "ex_cm·ez_a = " << (ex_cm.x()*ez_a(0) + ex_cm.y()*ez_a(1) + ex_cm.z()*ez_a(2)) << "\n";
-  // std::cout << "ey_cm·ex_a = " << (ey_cm.x()*ex_a(0) + ey_cm.y()*ex_a(1) + ey_cm.z()*ex_a(2)) << "\n";
-  // END DEBUG
-
   Acts::BoundMatrix covMat_acts_init = convertCovCMSSWtoACTS(tsos, covMat_cmssw_init);
-
-  //DEBUG
-  // std::cout << "\n[DBG PHYS COV]\n";
-
-  // std::cout << "Var loc0 = "
-  // << covMat_acts_init(Acts::eBoundLoc0,Acts::eBoundLoc0) << "\n";
-
-  // std::cout << "Var loc1 = "
-  // << covMat_acts_init(Acts::eBoundLoc1,Acts::eBoundLoc1) << "\n";
-
-  // std::cout << "Var phi = "
-  // << covMat_acts_init(Acts::eBoundPhi,Acts::eBoundPhi) << "\n";
-
-  // std::cout << "Var theta = "
-  // << covMat_acts_init(Acts::eBoundTheta,Acts::eBoundTheta) << "\n";
-
-  // std::cout << "Cov(phi,theta)= "
-  // << covMat_acts_init(Acts::eBoundPhi,Acts::eBoundTheta) << "\n";                                                                              
-  //END DEBUG
 
   Acts::GeometryContext gctx;
   auto t_initial = startToUse->transform(Acts::GeometryContext{});
@@ -885,108 +754,6 @@ std::pair<TrajectoryStateOnSurface, double> ActsPropagator::propagateWithPath(co
       throw cms::Exception("ACTSPropagator") << " failed to build ACTS initial parameters: " << res_StartParam.error();
     }
   }
-  // DEBUG
-  // {
-  //   ComputeLocalBoundJacobian computeJ;
-  //   const auto J = computeJ.FromCMSSWtoACTS(tsos);
-
-  //   const auto& surf = tsos.surface();
-  //   const auto& lp = tsos.localParameters();
-
-  //   const double tx0 = lp.dxdz();
-  //   const double ty0 = lp.dydz();
-
-  //   GlobalVector dG0 = tsos.globalDirection().unit();
-  //   LocalVector dL0 = surf.toLocal(dG0);
-  //   const double signUz = (dL0.z() >= 0.) ? +1. : -1.;
-
-  //   auto wrapToPi = [](double a) {
-  //     while (a > M_PI) a -= 2. * M_PI;
-  //     while (a < -M_PI) a += 2. * M_PI;
-  //     return a;
-  //   };
-
-  //   auto makeDirFromTxTy = [&](double tx, double ty) -> Acts::Vector3 {
-  //     const double s = std::sqrt(1. + tx * tx + ty * ty);
-
-  //     LocalVector dL(signUz * tx / s,
-  //                   signUz * ty / s,
-  //                   signUz / s);
-
-  //     GlobalVector dG = surf.toGlobal(dL).unit();
-
-  //     Acts::Vector3 dirA(dG.x(), dG.y(), dG.z());
-  //     dirA.normalize();
-  //     return dirA;
-  //   };
-
-  //   auto makeActsParsFromTxTy = [&](double tx, double ty) {
-  //     Acts::Vector3 dirPert = makeDirFromTxTy(tx, ty);
-
-  //     return Acts::BoundTrackParameters::create(
-  //         Acts::GeometryContext{},
-  //         startToUse,
-  //         pos4,
-  //         dirPert,
-  //         qOverP,
-  //         covMat_acts_init,
-  //         Acts::ParticleHypothesis::muon(),
-  //         1e-2);
-  //   };
-
-  //   const auto& p0 = res_StartParam.value().parameters();
-  //   const double phi0 = p0[Acts::eBoundPhi];
-  //   const double theta0 = p0[Acts::eBoundTheta];
-
-  //   const double h = 1e-6;
-
-  //   auto p_tx = makeActsParsFromTxTy(tx0 + h, ty0);
-  //   auto p_ty = makeActsParsFromTxTy(tx0, ty0 + h);
-
-  //   if (!p_tx.ok() || !p_ty.ok()) {
-  //     std::cout << "\n[DBG ACTS FD] Failed to build perturbed ACTS parameters\n";
-  //   } else {
-  //     const auto& par_tx = p_tx.value().parameters();
-  //     const auto& par_ty = p_ty.value().parameters();
-
-  //     const double dphi_dtx_fd =
-  //         wrapToPi(par_tx[Acts::eBoundPhi] - phi0) / h;
-  //     const double dphi_dty_fd =
-  //         wrapToPi(par_ty[Acts::eBoundPhi] - phi0) / h;
-
-  //     const double dtheta_dtx_fd =
-  //         (par_tx[Acts::eBoundTheta] - theta0) / h;
-  //     const double dtheta_dty_fd =
-  //         (par_ty[Acts::eBoundTheta] - theta0) / h;
-
-  //     std::cout << "\n================ ACTS FD JACOBIAN TEST ================\n";
-  //     std::cout << "eta-like theta = " << theta0
-  //               << " phi = " << phi0
-  //               << " tx = " << tx0
-  //               << " ty = " << ty0
-  //               << " signUz = " << signUz << "\n";
-
-  //     std::cout << "dphi/dtx   analytic = " << J(Acts::eBoundPhi,   1)
-  //               << "   ACTS FD = " << dphi_dtx_fd
-  //               << "   diff = " << (J(Acts::eBoundPhi, 1) - dphi_dtx_fd) << "\n";
-
-  //     std::cout << "dphi/dty   analytic = " << J(Acts::eBoundPhi,   2)
-  //               << "   ACTS FD = " << dphi_dty_fd
-  //               << "   diff = " << (J(Acts::eBoundPhi, 2) - dphi_dty_fd) << "\n";
-
-  //     std::cout << "dtheta/dtx analytic = " << J(Acts::eBoundTheta, 1)
-  //               << "   ACTS FD = " << dtheta_dtx_fd
-  //               << "   diff = " << (J(Acts::eBoundTheta, 1) - dtheta_dtx_fd) << "\n";
-
-  //     std::cout << "dtheta/dty analytic = " << J(Acts::eBoundTheta, 2)
-  //               << "   ACTS FD = " << dtheta_dty_fd
-  //               << "   diff = " << (J(Acts::eBoundTheta, 2) - dtheta_dty_fd) << "\n";
-
-  //     std::cout << "========================================================\n";
-  //   }
-  // }
-  // END DEBUG
-  
 
   return tsosWithPathFromActs(res_StartParam.value(), pDest, actsPropDir_);
 }
@@ -1085,5 +852,130 @@ std::pair<TrajectoryStateOnSurface, double> ActsPropagator::propagateWithPath(co
     throw cms::Exception("ACTSPropagator") << " failed to build ACTS initial parameters: " << res_StartParam.error();
 
   return tsosWithPathFromActs(res_StartParam.value(), cDest, actsPropDir_);
+}
+
+FreeTrajectoryState
+ActsPropagator::propagateWithPathToPerigeeInsideBP(const TrajectoryStateOnSurface& tsos) const {
+
+  auto makeInvalid = []() {
+    return FreeTrajectoryState();
+  };
+
+  GlobalPoint gPoint = tsos.globalPosition();
+  GlobalVector gDir = tsos.globalDirection();
+  double qOverP = tsos.signedInverseMomentum();
+
+  const auto& localErr = tsos.localError();
+  AlgebraicSymMatrix55 covMat_cmssw_init = localErr.matrix();
+
+  Acts::Vector4 pos4{gPoint.x() * 10., gPoint.y() * 10., gPoint.z() * 10., 0.};
+
+  Acts::Vector3 dir{gDir.x(), gDir.y(), gDir.z()};
+  dir.normalize();
+
+  SurfaceConverters surfConv(trkGeo_cmssw_, *trkGeo_and_DetEls_, m_Level);
+
+  auto startToUse =surfConv.fromCMSSWtoACTS(tsos.surface());
+
+  if (!startToUse) {
+    startToUse = buildTargetSurf(tsos.surface());
+  }
+
+  auto inflated = inflateStartPlaneIfRectOrTrap(*startToUse, Acts::GeometryContext{}, 9.0);
+  if (inflated) {
+    startToUse = inflated;
+  }
+
+  Acts::BoundMatrix covMat_acts_init =  convertCovCMSSWtoACTS(tsos, covMat_cmssw_init);
+
+  auto res_StartParam =Acts::BoundTrackParameters::create(Acts::GeometryContext{},
+                                                          startToUse,
+                                                          pos4,
+                                                          dir,
+                                                          qOverP,
+                                                          covMat_acts_init,
+                                                          Acts::ParticleHypothesis::muon(),
+                                                          1e-2);
+
+  if (!res_StartParam.ok()) {
+    return makeInvalid();
+  }
+
+  GlobalVector radial(gPoint.x(), gPoint.y(), 0.);
+  if (radial.mag2() < 1e-12) {
+    radial = GlobalVector(gDir.x(), gDir.y(), 0.);
+  }
+  if (radial.mag2() < 1e-12) {
+    radial = GlobalVector(1., 0., 0.);
+  }
+
+  radial = radial.unit();
+  const double targetR = 23.0; // mm = 2.3 cm
+
+  // Acts::Vector3 perigeeCenter{targetR * radial.x(), targetR * radial.y(), gPoint.z() * 10.};
+
+  // Define the perigee surface at (0,0,0) in ACTS coordinates 
+  Acts::Vector3 perigeeCenter{0., 0., 0.};
+  auto perigeeSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(perigeeCenter);
+
+  // Prepare the propagator
+  PropagationAlgorithm_Config cfg;
+  cfg.propDir = Acts::Direction::Backward();
+  cfg.covarianceTransport = true;
+  auto prop_logger = Acts::getDefaultLogger("Concrete Propagator", m_Level);
+  auto propResOpt = ConcProp->execute(cfg, *prop_logger, res_StartParam.value(), *perigeeSurface);
+
+  if (!propResOpt) {
+    return makeInvalid();
+  }
+
+  const auto& [bParam, length] = *propResOpt;
+
+  Acts::GeometryContext gctx;
+  const Acts::Vector3 finalPosActs = bParam.position(gctx);
+  const Acts::Vector3 finalDirActs = bParam.direction();
+  const Acts::Vector3 finalMomActs = bParam.momentum();
+  const double finalQOverP = bParam.parameters()[Acts::eBoundQOverP];
+
+  GlobalPoint finalPosCMS( finalPosActs.x() * 0.1,finalPosActs.y() * 0.1,finalPosActs.z() * 0.1);
+  GlobalVector finalMomCMS(finalMomActs.x(), finalMomActs.y(), finalMomActs.z());
+  // const double signedP = 1.0 / finalQOverP;
+  // GlobalVector finalMomCMS(finalDirActs.x() * signedP, finalDirActs.y() * signedP, finalDirActs.z() * signedP);
+
+  const int finalCharge = finalQOverP >= 0. ? +1 : -1;
+
+  GlobalTrajectoryParameters gtp(finalPosCMS, finalMomCMS, finalCharge, field);
+
+  // ===== Convert ACTS bound covariance on PerigeeSurface
+  //       -> ACTS free covariance
+  //       -> CMSSW CartesianTrajectoryError
+
+  auto covOpt = bParam.covariance();
+  if (!covOpt) {
+    return makeInvalid();
+  }
+
+  const Acts::BoundMatrix& Cbound = *covOpt;
+
+  Acts::BoundToFreeMatrix JboundToFree = bParam.referenceSurface().boundToFreeJacobian(gctx, finalPosActs, finalDirActs);
+
+  Acts::FreeMatrix Cfree = JboundToFree * Cbound * JboundToFree.transpose();
+
+  ComputeFreeJacobian jac;
+  Eigen::Matrix<double, 6, 8> JfreeToCms = jac.FromACTStoCMSSW(finalDirActs, finalQOverP, finalCharge);
+
+  Eigen::Matrix<double, 6, 6> CcmsEigen = JfreeToCms * Cfree * JfreeToCms.transpose();
+
+  AlgebraicSymMatrix66 Ccms;
+  for (int i = 0; i < 6; ++i) {
+    for (int j = 0; j <= i; ++j) {
+      Ccms(i, j) = CcmsEigen(i, j);
+    }
+  }
+  CartesianTrajectoryError cartErr(Ccms);
+
+  FreeTrajectoryState finalFTS(gtp, cartErr);
+
+  return finalFTS;
 }
 
